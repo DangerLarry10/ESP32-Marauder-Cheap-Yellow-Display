@@ -51,7 +51,7 @@ MenuFunctions::MenuFunctions()
           return !display_obj.headless_mode;
         }
       }
-    #elif defined(CYD_24CAP) || defined(CYD_22CAP)
+    #elif defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
     uint8_t MenuFunctions::updateTouch(uint16_t *x, uint16_t *y, uint16_t threshold) {
       if (!display_obj.headless_mode)
         return display_obj.tft.getTouchBBC(x, y, threshold);
@@ -125,7 +125,7 @@ MenuFunctions::MenuFunctions()
           }
       }
       was_pressed = touched;
-  #elif defined(CYD_24CAP)
+  #elif defined(CYD_24CAP) || defined(CYD_28CAP)
       touched = display_obj.tft.getTouchBBC(&touchX, &touchY, 600);
   #else
       touched = display_obj.tft.getTouch(&touchX, &touchY, 600);
@@ -810,11 +810,11 @@ void MenuFunctions::main(uint32_t currentTime)
       display_obj.displayBuffer();
 
 
-#ifdef CYD_24CAP
+#if defined(CYD_24CAP) || defined(CYD_28CAP)
   int pre_getTouch = millis();
 #endif
 
-#ifdef CYD_24CAP || defined(CYD_22CAP)
+#if defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
   int pre_getTouchBBC = millis();
 #endif
 
@@ -1584,6 +1584,8 @@ void MenuFunctions::orientDisplay()
   #ifdef HAS_SCREEN
     #ifdef CYD_28
       uint16_t calData[5] = { 350, 3465, 188, 3431, 2 }; // tft.setRotation(0); // Portrait with TFT Shield
+    #elif defined(CYD_28CAP)
+      uint16_t calData[5] = { 350, 3465, 188, 3431, 2 };
     #elif defined(CYD_24)
       uint16_t calData[5] = { 481, 3053, 433, 3296, 3 }; // tft.setRotation(0); // Portrait with TFT Shield
     #elif defined(CYD_24CAP)
@@ -3164,6 +3166,3 @@ void MenuFunctions::displayCurrentMenu(int start_index)
 }
 
 #endif
-
-
-

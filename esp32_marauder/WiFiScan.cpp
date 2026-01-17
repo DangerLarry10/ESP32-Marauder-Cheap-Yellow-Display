@@ -5,7 +5,7 @@
 
 TouchDrvGT911 touch;
 
-#if defined(CYD_24CAP) || defined(CYD_22CAP)
+#if defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
 #include <bb_captouch.h>
 #endif
 
@@ -1711,9 +1711,11 @@ void WiFiScan::RunLvJoinWiFi(uint8_t scan_mode, uint16_t color) {
 
     #if defined(CYD_28)
       uint16_t calData[5] = { 188, 3408, 286, 3498, 1 }; // Landscape CYD 2.8"
+    #elif defined(CYD_28CAP)
+      uint16_t calData[5] = { 188, 3408, 286, 3498, 1 };
     #elif defined(CYD_24)
       uint16_t calData[5] = { 410, 3305, 499, 3045, 0 }; // Landscape CYD 2.4"
-    #elif defined(CYD_24CAP) || defined(CYD_22CAP)
+    #elif defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
       uint16_t calData[5] = { 188, 3408, 286, 3498, 5 };
     #elif defined(CYD_24G)
       uint16_t calData[5] = { 400, 3141, 617, 2888, 1 }; // Landscape CYD 2.4" Guition
@@ -2296,9 +2298,11 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
       #ifdef HAS_SCREEN
         #ifdef CYD_28
           uint16_t calData[5] = { 188, 3408, 286, 3498, 1 }; // Landscape CYD 2.8"
+        #elif defined(CYD_28CAP)
+          uint16_t calData[5] = { 188, 3408, 286, 3498, 1 };
         #elif defined(CYD_24)
           uint16_t calData[5] = { 410, 3305, 499, 3045, 0 }; // Landscape CYD 2.4"
-        #elif defined(CYD_24CAP)
+        #elif defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
           uint16_t calData[5] = { 188, 3408, 286, 3498, 5 };
         #elif defined(CYD_24G)
           uint16_t calData[5] = { 400, 3141, 617, 2888, 1 }; // Landscape CYD 2.4" Guition
@@ -2427,11 +2431,13 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
     #ifdef HAS_SCREEN
       #ifdef CYD_28
         uint16_t calData[5] = { 188, 3408, 286, 3498, 1 }; // Landscape CYD 2.8"
+      #elif defined(CYD_28CAP)
+        uint16_t calData[5] = { 188, 3408, 286, 3498, 1 };
       #elif defined(CYD_24)
         uint16_t calData[5] = { 410, 3305, 499, 3045, 0 }; // Landscape CYD 2.4"
       #elif defined(CYD_24G)
         uint16_t calData[5] = { 400, 3141, 617, 2888, 1 }; // Landscape CYD 2.4" Guition
-      #elif defined(CYD_24CAP) || defined(CYD_22CAP)
+      #elif defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
         uint16_t calData[5] = { 188, 3408, 286, 3498, 5 };
       #elif defined(CYD_32)
         uint16_t calData[5] = { 346, 3526, 253, 3542, 3 }; // Landscape CYD 3.2"
@@ -5757,7 +5763,7 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
           display_obj.key[b].press(found);
       }
 
-  #elif defined(CYD_24CAP) || defined(CYD_22CAP)
+  #elif defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
       // 2.4" BBCAP capacitive
       uint16_t t_x = 0, t_y = 0;
       pressed = display_obj.tft.getTouchBBC(&t_x, &t_y);
@@ -5901,7 +5907,7 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
                   Serial.print("Got touch | X: "); Serial.print(t_x);
                   Serial.print(" Y: "); Serial.println(t_y);
               }
-          #elif defined(CYD_24CAP) || defined(CYD_22CAP)
+          #elif defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
             pressed = display_obj.tft.getTouchBBC(&t_x, &t_y);
           #endif
 
@@ -6085,7 +6091,7 @@ void WiFiScan::packetMonitorMain(uint32_t currentTime)
               } else {
                   Serial.println("headless mode");
               }
-          #elif defined(CYD_24CAP) || defined(CYD_22CAP)
+          #elif defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
             pressed = display_obj.tft.getTouchBBC(&t_x, &t_y);
           #else
             pressed = display_obj.tft.getTouch(&t_x, &t_y);
@@ -7017,4 +7023,3 @@ void WiFiScan::main(uint32_t currentTime)
         gps_obj.disable_queue();
   #endif
 }
-
