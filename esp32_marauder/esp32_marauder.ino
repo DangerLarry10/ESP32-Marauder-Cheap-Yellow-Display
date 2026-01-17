@@ -11,7 +11,7 @@ https://www.online-utility.org/image/convert/to/XBM
 
 TouchDrvGT911 touch;
 
-#if defined(CYD_24CAP) || defined(CYD_22CAP)
+#if defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
 BBCapTouch bbct;
 const char *szNames[] = {"Unknown", "FT6x36", "GT911", "CST820"};
 #endif
@@ -239,6 +239,11 @@ void setup()
       }
   #elif defined(CYD_24CAP)
     bbct.init(TOUCH_SDA, TOUCH_SCL, TOUCH_RST, TOUCH_INT);
+    int iType = bbct.sensorType();
+    Serial.printf("Sensor type = %s\n", szNames[iType]);
+  #elif defined(CYD_28CAP)
+    bbct.init(TOUCH_SDA, TOUCH_SCL, TOUCH_RST, TOUCH_INT);
+    bbct.setOrientation(0, TFT_WIDTH, TFT_HEIGHT);
     int iType = bbct.sensorType();
     Serial.printf("Sensor type = %s\n", szNames[iType]);
   #elif defined(CYD_22CAP)
