@@ -36,6 +36,8 @@ void Display::RunSetup()
   #ifdef HAS_SCREEN
     #ifdef CYD_28CAP
       uint16_t calData[5] = { 350, 3465, 188, 3431, 2 };
+    #elif defined(CYD_28CAP)
+      uint16_t calData[5] = { 350, 3465, 188, 3431, 2 };
       (void)calData;
     #endif
   #endif

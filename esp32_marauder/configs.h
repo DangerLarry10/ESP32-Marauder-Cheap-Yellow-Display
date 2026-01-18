@@ -30,6 +30,141 @@
   #define HAS_GPS
   #define CYD_28CAP
 
+  #ifdef MARAUDER_REV_FEATHER
+    //#define FLIPPER_ZERO_HAT
+    //#define HAS_BATTERY
+    //#define HAS_BT
+    #define HAS_BUTTONS
+    #define HAS_NEOPIXEL_LED
+    //#define HAS_PWR_MGMT
+    #define HAS_SCREEN
+    #define HAS_MINI_SCREEN
+    #define HAS_SD
+    #define USE_SD
+    #define HAS_TEMP_SENSOR
+    #define HAS_GPS
+  #endif
+
+  #ifdef MARAUDER_V4
+    #define HAS_BATTERY
+    #define HAS_BT
+    #define HAS_NEOPIXEL_LED
+    //#define HAS_PWR_MGMT
+    #define HAS_SCREEN
+    #define HAS_FULL_SCREEN
+    #define HAS_SD
+    #define USE_SD
+    #define HAS_GPS
+    //#define CYD_22CAP
+    //#define CYD_24
+    //#define CYD_24G
+    //#define CYD_24CAP
+    //#define CYD_28
+    #define CYD_28CAP
+    //#define CYD_32
+    //#define CYD_32CAP
+    //#define CYD_35
+    //#define CYD_35CAP
+  #endif
+
+  #if defined(MARAUDER_V6) || defined(MARAUDER_V6_1)
+    //#define FLIPPER_ZERO_HAT
+    #define HAS_BATTERY
+    #define HAS_BT
+    #define HAS_BT_REMOTE
+    #define HAS_BUTTONS
+    #define HAS_NEOPIXEL_LED
+    //#define HAS_PWR_MGMT
+    #define HAS_SCREEN
+    #define HAS_FULL_SCREEN
+    #define HAS_SD
+    #define USE_SD
+    #define HAS_TEMP_SENSOR
+    #define HAS_GPS
+  #endif
+
+  #ifdef MARAUDER_KIT
+    //#define FLIPPER_ZERO_HAT
+    #define HAS_BATTERY
+    #define HAS_BT
+    //#define HAS_BUTTONS
+    #define HAS_NEOPIXEL_LED
+    //#define HAS_PWR_MGMT
+    #define HAS_SCREEN
+    #define HAS_FULL_SCREEN
+    #define HAS_SD
+    #define USE_SD
+    #define HAS_TEMP_SENSOR
+    #define HAS_GPS
+  #endif
+
+  #ifdef GENERIC_ESP32
+    //#define FLIPPER_ZERO_HAT
+    //#define HAS_BATTERY
+    #define HAS_BT
+    //#define HAS_BUTTONS
+    //#define HAS_NEOPIXEL_LED
+    //#define HAS_PWR_MGMT
+    //#define HAS_SCREEN
+    //#define HAS_SD
+    //#define HAS_TEMP_SENSOR
+    //#define HAS_GPS
+  #endif
+
+  #ifdef MARAUDER_FLIPPER
+    //#define FLIPPER_ZERO_HAT
+    //#define HAS_BATTERY
+    //#define HAS_BT
+    //#define HAS_BUTTONS
+    //#define HAS_NEOPIXEL_LED
+    //#define HAS_PWR_MGMT
+    //#define HAS_SCREEN
+    #define HAS_GPS
+    #define HAS_SD
+    #define USE_SD
+    //#define HAS_TEMP_SENSOR
+  #endif
+
+  #ifdef ESP32_LDDB
+    //#define FLIPPER_ZERO_HAT
+    //#define HAS_BATTERY
+    #define HAS_BT
+    //#define HAS_BUTTONS
+    #define HAS_NEOPIXEL_LED
+    //#define HAS_PWR_MGMT
+    //#define HAS_SCREEN
+    #define HAS_SD
+    #define USE_SD
+    //#define HAS_TEMP_SENSOR
+    //#define HAS_GPS
+  #endif
+
+  #ifdef MARAUDER_DEV_BOARD_PRO
+    //#define FLIPPER_ZERO_HAT
+    //#define HAS_BATTERY
+    #define HAS_BT
+    //#define HAS_BUTTONS
+    #define HAS_NEOPIXEL_LED
+    //#define HAS_PWR_MGMT
+    //#define HAS_SCREEN
+    #define HAS_SD
+    #define USE_SD
+    //#define HAS_TEMP_SENSOR
+    #define HAS_GPS
+  #endif
+
+  #ifdef XIAO_ESP32_S3
+    #define FLIPPER_ZERO_HAT
+    //#define HAS_BATTERY
+    #define HAS_BT
+    //#define HAS_BUTTONS
+    //#define HAS_NEOPIXEL_LED
+    //#define HAS_PWR_MGMT
+    //#define HAS_SCREEN
+    //#define HAS_SD
+    //#define HAS_TEMP_SENSOR
+    //#define HAS_GPS
+  #endif
   //// END BOARD FEATURES
 
   //// BUTTON DEFINITIONS
@@ -40,7 +175,369 @@
   #ifdef HAS_SCREEN
 
     #ifdef MARAUDER_V4
+      // 2.2 capacitive
+      #ifdef CYD_22CAP
+        #define SCREEN_CHAR_WIDTH 40
+        #define HAS_ST7789
+        #define BANNER_TEXT_SIZE 2
+
+        #ifndef TFT_WIDTH
+          #define TFT_WIDTH 240
+        #endif
+
+        #ifndef TFT_HEIGHT
+          #define TFT_HEIGHT 320
+        #endif
+
+        #define TOUCH_SDA  21
+        #define TOUCH_SCL  22
+        #define TOUCH_INT -1
+        #define TOUCH_RST -1
+        //#define TOUCH_CS -1
+
+        //#define TFT_MISO 12 // or SDO
+        //#define TFT_MOSI 13 // In some display driver board, it might be written as "SDA" or SDI
+        //#define TFT_SCLK 14
+        //#define TFT_CS   15  // Chip select control pin
+        //#define TFT_DC   2   // Data Command control pin (OR RS)
+        //#define TFT_RST  -1  // Reset pin (could connect to Arduino RESET pin)
+        #define TFT_BL   27  // LED back-light
+        #define TFT_BACKLIGHT_ON HIGH  // Level to turn ON back-light (HIGH or LOW)
+
+        #define TOUCH_WIDTH  240
+        #define TOUCH_HEIGHT 320
+
+        // Generic commands used by TFT_eSPI.cpp
+        #define TFT_NOP     0x00
+        #define TFT_SWRST   0x01
+        #define TFT_INVOFF  0x20
+        #define TFT_INVON   0x21
+        #define TFT_DISPOFF 0x28
+        #define TFT_DISPON  0x29
+        #define TFT_CASET   0x2A
+        #define TFT_PASET   0x2B
+        #define TFT_RAMWR   0x2C
+        #define TFT_RAMRD   0x2E
+        #define TFT_MADCTL  0x36
+        #define TFT_MAD_MY  0x80
+        #define TFT_MAD_MX  0x40
+        #define TFT_MAD_MV  0x20
+        #define TFT_MAD_ML  0x10
+        #define TFT_MAD_BGR 0x08
+        #define TFT_MAD_MH  0x10
+        #define TFT_MAD_RGB 0x00
+
+        #ifdef TFT_RGB_ORDER
+          #if (TFT_RGB_ORDER == 1)
+            #define TFT_MAD_COLOR_ORDER TFT_MAD_RGB
+          #else
+            #define TFT_MAD_COLOR_ORDER TFT_MAD_BGR
+          #endif
+        #else
+          #define TFT_MAD_COLOR_ORDER TFT_MAD_BGR
+        #endif
+
+        
+        #define ST7789_NOP     0x00
+        #define ST7789_SWRESET 0x01
+        #define ST7789_RDDID   0x04
+        #define ST7789_RDDST   0x09
+        #define ST7789_SLPIN   0x10
+        #define ST7789_SLPOUT  0x11
+        #define ST7789_PTLON   0x12
+        #define ST7789_NORON   0x13
+        #define ST7789_INVOFF  0x20
+        #define ST7789_INVON   0x21
+        #define ST7789_DISPOFF 0x28
+        #define ST7789_DISPON  0x29
+        #define ST7789_CASET   0x2A
+        #define ST7789_PASET   0x2B
+        #define ST7789_RAMWR   0x2C
+        #define ST7789_RAMRD   0x2E
+        #define ST7789_PTLAR   0x30
+        #define ST7789_MADCTL  0x36
+        #define ST7789_COLMOD  0x3A
+        #define ST7789_FRMCTR1 0xB1
+        #define ST7789_FRMCTR2 0xB2
+        #define ST7789_FRMCTR3 0xB3
+        #define ST7789_INVCTR  0xB4
+        #define ST7789_DISSET5 0xB6
+        #define ST7789_PWCTR1  0xC0
+        #define ST7789_PWCTR2  0xC1
+        #define ST7789_PWCTR3  0xC2
+        #define ST7789_VMCTR1  0xC5
+        #define ST7789_RDID1   0xDA
+        #define ST7789_RDID2   0xDB
+        #define ST7789_RDID3   0xDC
+        #define ST7789_RDID4   0xDD
+        #define ST7789_GMCTRP1 0xE0
+        #define ST7789_GMCTRN1 0xE1
+      #endif
+      
+      #ifdef CYD_24
+        #define SCREEN_CHAR_WIDTH 40
+        #define HAS_ILI9341
+        #define BANNER_TEXT_SIZE 2
+
+        #ifndef TFT_WIDTH
+          #define TFT_WIDTH 240
+        #endif
+
+        #ifndef TFT_HEIGHT
+          #define TFT_HEIGHT 320
+        #endif
+      #endif // CYD_24
+
+      #ifdef CYD_24G
+        #define SCREEN_CHAR_WIDTH 40
+        #define HAS_ILI9341
+        #define BANNER_TEXT_SIZE 2
+
+        #ifndef TFT_WIDTH
+          #define TFT_WIDTH 240
+        #endif
+
+        #ifndef TFT_HEIGHT
+          #define TFT_HEIGHT 320
+        #endif
+      #endif // CYD_24
+
+      #ifdef CYD_24CAP
+        #define SCREEN_CHAR_WIDTH 40
+        #define HAS_ILI9341
+        #define BANNER_TEXT_SIZE 2
+
+        #ifndef TFT_WIDTH
+            #define TFT_WIDTH 240
+        #endif
+
+        #ifndef TFT_HEIGHT
+            #define TFT_HEIGHT 320
+        #endif
+
+        //#define THROW_AWAY_TOUCH_COUNT 31
+        // Touchscreen pins (already in your config, kept as-is)
+        #define TOUCH_SDA  33
+        #define TOUCH_SCL  32
+        #define TOUCH_INT 21
+        #define TOUCH_RST 25
+
+        // Additional capacitive touch definitions
+        #define TFT_MISO 12 // or SDO
+        #define TFT_MOSI 13 // In some display driver board, it might be written as "SDA" or SDI
+        #define TFT_SCLK 14
+        #define TFT_CS   15  // Chip select control pin
+        #define TFT_DC   2   // Data Command control pin (OR RS)
+        #define TFT_RST  -1  // Reset pin (could connect to Arduino RESET pin)
+        #define TFT_BL   27  // LED back-light
+        #define TFT_BACKLIGHT_ON HIGH  // Level to turn ON back-light (HIGH or LOW)
+
+        #define TOUCH_WIDTH  240
+        #define TOUCH_HEIGHT 320
+
+        //#define SPI_FREQUENCY  55000000
+        //#define SPI_READ_FREQUENCY  20000000
+        //#define SPI_TOUCH_FREQUENCY  2500000
+
+        // Generic commands used by TFT_eSPI.cpp
+        #define TFT_NOP     0x00
+        #define TFT_SWRST   0x01
+        #define TFT_INVOFF  0x20
+        #define TFT_INVON   0x21
+        #define TFT_DISPOFF 0x28
+        #define TFT_DISPON  0x29
+        #define TFT_CASET   0x2A
+        #define TFT_PASET   0x2B
+        #define TFT_RAMWR   0x2C
+        #define TFT_RAMRD   0x2E
+        #define TFT_MADCTL  0x36
+        #define TFT_MAD_MY  0x80
+        #define TFT_MAD_MX  0x40
+        #define TFT_MAD_MV  0x20
+        #define TFT_MAD_ML  0x10
+        #define TFT_MAD_BGR 0x08
+        #define TFT_MAD_MH  0x10
+        #define TFT_MAD_RGB 0x00
+
+        #ifdef TFT_RGB_ORDER
+            #if (TFT_RGB_ORDER == 1)
+                #define TFT_MAD_COLOR_ORDER TFT_MAD_RGB
+            #else
+                #define TFT_MAD_COLOR_ORDER TFT_MAD_BGR
+            #endif
+        #else
+            #define TFT_MAD_COLOR_ORDER TFT_MAD_BGR
+        #endif
+
+        // ILI9341 specific commands (replacing ST7789 commands)
+        #define ILI9341_NOP     0x00
+        #define ILI9341_SWRESET 0x01
+        #define ILI9341_RDDID   0x04
+        #define ILI9341_RDDST   0x09
+        #define ILI9341_SLPIN   0x10
+        #define ILI9341_SLPOUT  0x11
+        #define ILI9341_PTLON   0x12
+        #define ILI9341_NORON   0x13
+        #define ILI9341_INVOFF  0x20
+        #define ILI9341_INVON   0x21
+        #define ILI9341_DISPOFF 0x28
+        #define ILI9341_DISPON  0x29
+        #define ILI9341_CASET   0x2A
+        #define ILI9341_PASET   0x2B
+        #define ILI9341_RAMWR   0x2C
+        #define ILI9341_RAMRD   0x2E
+        #define ILI9341_PTLAR   0x30
+        #define ILI9341_MADCTL  0x36
+        #define ILI9341_COLMOD  0x3A
+        #define ILI9341_FRMCTR1 0xB1
+        #define ILI9341_FRMCTR2 0xB2
+        #define ILI9341_FRMCTR3 0xB3
+        #define ILI9341_INVCTR  0xB4
+        #define ILI9341_DISSET5 0xB6
+        #define ILI9341_PWCTR1  0xC0
+        #define ILI9341_PWCTR2  0xC1
+        #define ILI9341_PWCTR3  0xC2
+        #define ILI9341_VMCTR1  0xC5
+        #define ILI9341_RDID1   0xDA
+        #define ILI9341_RDID2   0xDB
+        #define ILI9341_RDID3   0xDC
+        #define ILI9341_RDID4   0xDD
+        #define ILI9341_GMCTRP1 0xE0
+        #define ILI9341_GMCTRN1 0xE1
+      #endif // CYD_24CAP
+
+      #ifdef CYD_28
+        #define SCREEN_CHAR_WIDTH 40
+        #define HAS_ILI9341
+        #define BANNER_TEXT_SIZE 2
+
+        #ifndef TFT_WIDTH
+          #define TFT_WIDTH 240
+        #endif
+
+        #ifndef TFT_HEIGHT
+          #define TFT_HEIGHT 320
+        #endif
+      #endif // CYD_28
+
       #ifdef CYD_28CAP
+        #define SCREEN_CHAR_WIDTH 40
+        #define HAS_ST7789
+        #define BANNER_TEXT_SIZE 2
+
+        #ifndef TFT_WIDTH
+          #define TFT_WIDTH 240
+        #endif
+
+        #ifndef TFT_HEIGHT
+          #define TFT_HEIGHT 320
+        #endif
+
+        #define THROW_AWAY_TOUCH_COUNT 31
+        // Touchscreen pins (CST820)
+        #define TOUCH_SDA  33
+        #define TOUCH_SCL  32
+        #define TOUCH_INT 21
+        #define TOUCH_RST 25
+
+        // Display pins (ST7789)
+        #define TFT_MISO 12 // or SDO
+        #define TFT_MOSI 13 // In some display driver board, it might be written as "SDA" or SDI
+        #define TFT_SCLK 14
+        #define TFT_CS   15  // Chip select control pin
+        #define TFT_DC   2   // Data Command control pin (OR RS)
+        #define TFT_RST  -1  // Reset pin (could connect to Arduino RESET pin)
+        #define TFT_BL   27  // LED back-light
+        #define TFT_BACKLIGHT_ON HIGH  // Level to turn ON back-light (HIGH or LOW)
+
+        #define TOUCH_WIDTH  240
+        #define TOUCH_HEIGHT 320
+
+        #define SPI_FREQUENCY  65000000
+        #define SPI_READ_FREQUENCY  20000000
+        #define SPI_TOUCH_FREQUENCY  2500000
+
+        // Generic commands used by TFT_eSPI.cpp
+        #define TFT_NOP     0x00
+        #define TFT_SWRST   0x01
+        #define TFT_INVOFF  0x20
+        #define TFT_INVON   0x21
+        #define TFT_DISPOFF 0x28
+        #define TFT_DISPON  0x29
+        #define TFT_CASET   0x2A
+        #define TFT_PASET   0x2B
+        #define TFT_RAMWR   0x2C
+        #define TFT_RAMRD   0x2E
+        #define TFT_MADCTL  0x36
+        #define TFT_MAD_MY  0x80
+        #define TFT_MAD_MX  0x40
+        #define TFT_MAD_MV  0x20
+        #define TFT_MAD_ML  0x10
+        #define TFT_MAD_BGR 0x08
+        #define TFT_MAD_MH  0x10
+        #define TFT_MAD_RGB 0x00
+
+        #ifdef TFT_RGB_ORDER
+          #if (TFT_RGB_ORDER == 1)
+            #define TFT_MAD_COLOR_ORDER TFT_MAD_RGB
+          #else
+            #define TFT_MAD_COLOR_ORDER TFT_MAD_BGR
+          #endif
+        #else
+          #define TFT_MAD_COLOR_ORDER TFT_MAD_BGR
+        #endif
+
+        #define ST7789_NOP     0x00
+        #define ST7789_SWRESET 0x01
+        #define ST7789_RDDID   0x04
+        #define ST7789_RDDST   0x09
+        #define ST7789_SLPIN   0x10
+        #define ST7789_SLPOUT  0x11
+        #define ST7789_PTLON   0x12
+        #define ST7789_NORON   0x13
+        #define ST7789_INVOFF  0x20
+        #define ST7789_INVON   0x21
+        #define ST7789_DISPOFF 0x28
+        #define ST7789_DISPON  0x29
+        #define ST7789_CASET   0x2A
+        #define ST7789_PASET   0x2B
+        #define ST7789_RAMWR   0x2C
+        #define ST7789_RAMRD   0x2E
+        #define ST7789_PTLAR   0x30
+        #define ST7789_MADCTL  0x36
+        #define ST7789_COLMOD  0x3A
+        #define ST7789_FRMCTR1 0xB1
+        #define ST7789_FRMCTR2 0xB2
+        #define ST7789_FRMCTR3 0xB3
+        #define ST7789_INVCTR  0xB4
+        #define ST7789_DISSET5 0xB6
+        #define ST7789_PWCTR1  0xC0
+        #define ST7789_PWCTR2  0xC1
+        #define ST7789_PWCTR3  0xC2
+        #define ST7789_VMCTR1  0xC5
+        #define ST7789_RDID1   0xDA
+        #define ST7789_RDID2   0xDB
+        #define ST7789_RDID3   0xDC
+        #define ST7789_RDID4   0xDD
+        #define ST7789_GMCTRP1 0xE0
+        #define ST7789_GMCTRN1 0xE1
+      #endif // CYD_28CAP
+
+      #ifdef CYD_32
+        #define SCREEN_CHAR_WIDTH 40
+        #define HAS_ST7789
+        #define BANNER_TEXT_SIZE 2
+
+        #ifndef TFT_WIDTH
+          #define TFT_WIDTH 240
+        #endif
+
+        #ifndef TFT_HEIGHT
+          #define TFT_HEIGHT 320
+        #endif
+      #endif // CYD_32
+
+      #ifdef CYD_32CAP
         #define SCREEN_CHAR_WIDTH 40
         #define HAS_ST7789
         #define BANNER_TEXT_SIZE 2
@@ -313,8 +810,45 @@
 
   //// BATTERY STUFF
   #ifdef HAS_BATTERY
-    #define I2C_SDA 22
-    #define I2C_SCL 27
+    #ifdef MARAUDER_V4
+      #if defined(CYD_35) || defined(CYD_24) || defined(CYD_32) || defined(CYD_32CAP) || defined(CYD_35CAP)
+        #define I2C_SDA 21
+        #define I2C_SCL 22
+      #elif defined(CYD_28) || defined(CYD_28CAP) || defined(CYD_24G) || defined(CYD_24CAP)
+        #define I2C_SDA 22
+        #define I2C_SCL 27
+      #endif
+    #endif
+
+    #ifdef MARAUDER_V6
+      #define I2C_SDA 33
+      #define I2C_SCL 22
+    #endif
+
+    #ifdef MARAUDER_V6_1
+      #define I2C_SDA 33
+      #define I2C_SCL 22
+    #endif
+
+    #ifdef MARAUDER_M5STICKC
+      #define I2C_SDA 33
+      #define I2C_SCL 22
+    #endif
+
+    #ifdef MARAUDER_KIT
+      #define I2C_SDA 33
+      #define I2C_SCL 22
+    #endif
+
+    #ifdef MARAUDER_MINI
+      #define I2C_SDA 33
+      #define I2C_SCL 26
+    #endif
+
+    #ifdef MARAUDER_V7
+      #define I2C_SDA 33
+      #define I2C_SCL 16
+    #endif
 
   #endif
 

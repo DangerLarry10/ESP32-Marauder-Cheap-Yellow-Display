@@ -27,20 +27,44 @@ MenuFunctions::MenuFunctions()
 // LVGL Stuff
 /* Interrupt driven periodic handler */
 #if defined(HAS_ST7789) || defined(HAS_ILI9341) || defined(HAS_ST7796)
-uint8_t MenuFunctions::updateTouch(uint16_t *x, uint16_t *y, uint16_t threshold) {
-  if (display_obj.headless_mode)
-    return 0;
+    #if defined(CYD_32CAP) || defined(CYD_35CAP)
+      uint8_t MenuFunctions::updateTouch(int16_t *x, int16_t *y, uint16_t threshold) {
+        static bool was_pressed = false;
+        if (!display_obj.headless_mode) {
+          int16_t t_x[5] = {0,0,0,0,0}, t_y[5] = {0,0,0,0,0};
+          uint8_t result = touch.getPoint(t_x, t_y, touch.getSupportTouchPoint());
+          bool pressed = result > 0;
 
-  TOUCHINFO ti = {};
-  if (bbct.getSamples(&ti) && ti.count > 0) {
-    *x = ti.x[0];
-    *y = ti.y[0];
-    return 1;
-  }
-
-  return 0;
-}
-#endif
+          if (pressed && !was_pressed) {
+            for (int i = 0; i < result; i++) {
+              x[i] = t_x[i];
+              y[i] = t_y[i];
+            }
+            
+            int16_t tmp_x[5] = {0,0,0,0,0}, tmp_y[5] = {0,0,0,0,0};
+            for (int i = 0; i < THROW_AWAY_TOUCH_COUNT; i++) {
+              touch.getPoint(tmp_x, tmp_y, touch.getSupportTouchPoint());
+              delay(1);
+            }
+            was_pressed = true;
+            return result;
+          } else if (!pressed) {
+            was_pressed = false;
+          }
+          return 0;
+        } else {
+          Serial.println("headless mode");
+          return !display_obj.headless_mode;
+        }
+      }
+    #elif defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
+    uint8_t MenuFunctions::updateTouch(uint16_t *x, uint16_t *y, uint16_t threshold) {
+      if (!display_obj.headless_mode)
+        return display_obj.tft.getTouchBBC(x, y, threshold);
+      else
+        return !display_obj.headless_mode;
+    }
+  
 
 
 
@@ -73,14 +97,36 @@ uint8_t MenuFunctions::updateTouch(uint16_t *x, uint16_t *y, uint16_t threshold)
     static bool was_pressed = false;
     bool touched = false;
   
-    uint16_t touchX = 0;
-    uint16_t touchY = 0;
-    TOUCHINFO ti = {};
-    if (bbct.getSamples(&ti) && ti.count > 0) {
-      touchX = ti.x[0];
-      touchY = ti.y[0];
-      touched = true;
-    }
+    #if defined(CYD_32CAP) || defined(CYD_35CAP)    
+      int16_t touchX = 0, touchY = 0;
+    #else
+      uint16_t touchX, touchY;
+    #endif
+
+  #if defined(CYD_32CAP) || defined(CYD_35CAP)
+      touch.setMaxCoordinates(SCREEN_HEIGHT, SCREEN_WIDTH);
+      touch.setSwapXY(true);
+      touch.setMirrorXY(true, true);
+      int16_t touchX_array[5] = {0, 0, 0, 0, 0}, touchY_array[5] = {0, 0, 0, 0, 0};
+      int16_t points = touch.getPoint(touchX_array, touchY_array, touch.getSupportTouchPoint());
+      touched = (points > 0);
+      if (touched) {
+          touchX = touchX_array[0];
+          touchY = touchY_array[0];
+          if (!was_pressed) {
+              for (int i = 0; i < THROW_AWAY_TOUCH_COUNT; i++) {
+                  int16_t tmp_x[5] = {0, 0, 0, 0, 0}, tmp_y[5] = {0, 0, 0, 0, 0};
+                  touch.getPoint(tmp_x, tmp_y, touch.getSupportTouchPoint());
+                  delay(1);
+              }
+          }
+      }
+      was_pressed = touched;
+  #elif defined(CYD_24CAP) || defined(CYD_28CAP)
+      touched = display_obj.tft.getTouchBBC(&touchX, &touchY, 600);
+  #else
+      touched = display_obj.tft.getTouch(&touchX, &touchY, 600);
+  #endif
 
   // Handle touch state and coordinates
   if (!touched) {
@@ -751,11 +797,11 @@ void MenuFunctions::main(uint32_t currentTime)
       display_obj.displayBuffer();
 
 
-#if defined(CYD_28CAP)
+#if defined(CYD_24CAP) || defined(CYD_28CAP)
   int pre_getTouch = millis();
 #endif
 
-#if defined(CYD_28CAP)
+#if defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
   int pre_getTouchBBC = millis();
 #endif
 
@@ -1490,8 +1536,25 @@ void MenuFunctions::orientDisplay()
   display_obj.tft.setCursor(0, 0);
 
   #ifdef HAS_SCREEN
-    #ifdef CYD_28CAP
+    #ifdef CYD_28
+      uint16_t calData[5] = { 350, 3465, 188, 3431, 2 }; // tft.setRotation(0); // Portrait with TFT Shield
+    #elif defined(CYD_28CAP)
       uint16_t calData[5] = { 350, 3465, 188, 3431, 2 };
+    #elif defined(CYD_24)
+      uint16_t calData[5] = { 481, 3053, 433, 3296, 3 }; // tft.setRotation(0); // Portrait with TFT Shield
+    #elif defined(CYD_24CAP)
+      uint16_t calData[5] = { 405, 3209, 297, 3314, 2 };
+    #elif defined(CYD_24G)
+      uint16_t calData[5] = { 405, 3209, 297, 3314, 2 }; // tft.setRotation(0); // Portrait with TFT Shield
+    #elif defined(CYD_32)
+      uint16_t calData[5] = { 251, 3539, 331, 3534, 6 }; // tft.setRotation(0); // Portrait with TFT Shield
+    #elif defined(CYD_35)
+      uint16_t calData[5] = { 309, 3465, 297, 3552, 6 };
+    #elif defined(TFT_DIY)
+      uint16_t calData[5] = { 339, 3470, 237, 3438, 2 }; // tft.setRotation(0); // Portrait with DIY TFT
+    #endif
+
+    #if !defined(CYD_32CAP) && !defined(CYD_35CAP)
       display_obj.tft.setTouch(calData);
     #endif
   #endif
