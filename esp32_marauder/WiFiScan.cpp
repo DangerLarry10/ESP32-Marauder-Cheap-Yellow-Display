@@ -5,7 +5,7 @@
 
 TouchDrvGT911 touch;
 
-#if defined(CYD_28CAP)
+#if defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
 #include <bb_captouch.h>
 #endif
 
@@ -1709,8 +1709,26 @@ void WiFiScan::RunLvJoinWiFi(uint8_t scan_mode, uint16_t color) {
     display_obj.tft.init();
     display_obj.tft.setRotation(1);
 
-    #if defined(CYD_28CAP)
+    #if defined(CYD_28)
+      uint16_t calData[5] = { 188, 3408, 286, 3498, 1 }; // Landscape CYD 2.8"
+    #elif defined(CYD_28CAP)
       uint16_t calData[5] = { 188, 3408, 286, 3498, 1 };
+    #elif defined(CYD_24)
+      uint16_t calData[5] = { 410, 3305, 499, 3045, 0 }; // Landscape CYD 2.4"
+    #elif defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
+      uint16_t calData[5] = { 188, 3408, 286, 3498, 5 };
+    #elif defined(CYD_24G)
+      uint16_t calData[5] = { 400, 3141, 617, 2888, 1 }; // Landscape CYD 2.4" Guition
+    #elif defined(CYD_32)
+      uint16_t calData[5] = { 346, 3526, 253, 3542, 3 }; // Landscape CYD 3.2"
+    #elif defined(CYD_35)
+      uint16_t calData[5] = { 292, 3570, 295, 3436, 3 }; // Landscape CYD 3.5"
+    #elif defined(TFT_DIY)
+      uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY
+      Serial.println("Using TFT DIY");
+    #endif
+
+    #if !defined(CYD_32CAP) && !defined(CYD_35CAP)
       display_obj.tft.setTouch(calData);
     #endif
 
@@ -2278,9 +2296,23 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
       #endif
     
       #ifdef HAS_SCREEN
-        #if defined(CYD_28CAP)
+        #ifdef CYD_28
+          uint16_t calData[5] = { 188, 3408, 286, 3498, 1 }; // Landscape CYD 2.8"
+        #elif defined(CYD_28CAP)
           uint16_t calData[5] = { 188, 3408, 286, 3498, 1 };
-          display_obj.tft.setTouch(calData);
+        #elif defined(CYD_24)
+          uint16_t calData[5] = { 410, 3305, 499, 3045, 0 }; // Landscape CYD 2.4"
+        #elif defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
+          uint16_t calData[5] = { 188, 3408, 286, 3498, 5 };
+        #elif defined(CYD_24G)
+          uint16_t calData[5] = { 400, 3141, 617, 2888, 1 }; // Landscape CYD 2.4" Guition
+        #elif defined(CYD_32)
+          uint16_t calData[5] = { 346, 3526, 253, 3542, 3 }; // Landscape CYD 3.2"
+        #elif defined(CYD_35)
+          uint16_t calData[5] = { 292, 3570, 295, 3436, 3 }; // Landscape CYD 3.5"
+        #elif defined(TFT_DIY)
+          uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY
+          Serial.println("Using TFT DIY");
         #endif
 
         //display_obj.tft.setFreeFont(1);
@@ -2393,8 +2425,25 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
     startPcap("eapol");
   
     #ifdef HAS_SCREEN
-      #if defined(CYD_28CAP)
+      #ifdef CYD_28
+        uint16_t calData[5] = { 188, 3408, 286, 3498, 1 }; // Landscape CYD 2.8"
+      #elif defined(CYD_28CAP)
         uint16_t calData[5] = { 188, 3408, 286, 3498, 1 };
+      #elif defined(CYD_24)
+        uint16_t calData[5] = { 410, 3305, 499, 3045, 0 }; // Landscape CYD 2.4"
+      #elif defined(CYD_24G)
+        uint16_t calData[5] = { 400, 3141, 617, 2888, 1 }; // Landscape CYD 2.4" Guition
+      #elif defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
+        uint16_t calData[5] = { 188, 3408, 286, 3498, 5 };
+      #elif defined(CYD_32)
+        uint16_t calData[5] = { 346, 3526, 253, 3542, 3 }; // Landscape CYD 3.2"
+      #elif defined(CYD_35)
+        uint16_t calData[5] = { 292, 3570, 295, 3436, 3 }; // Landscape CYD 3.5"
+      #elif defined(TFT_DIY)
+        uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY
+      #endif
+
+      #if !defined(CYD_32CAP) && !defined(CYD_35CAP)
         display_obj.tft.setTouch(calData);
       #endif
 
@@ -5674,7 +5723,44 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
     // Disable unused buttons once
     
 
-  #if defined(CYD_28CAP)
+  #if defined(CYD_32CAP) || defined(CYD_35CAP)
+      // 3.2"/3.5" capacitive
+      int16_t t_x[5] = {0}, t_y[5] = {0};
+      int16_t points = 0;
+
+      if (!display_obj.headless_mode) {
+          points = touch.getPoint(t_x, t_y, touch.getSupportTouchPoint());
+          pressed = (points > 0);
+
+          if (pressed && !was_pressed) {
+              for (int i = 0; i < THROW_AWAY_TOUCH_COUNT; i++) {
+                  int16_t tmp_x[5] = {0}, tmp_y[5] = {0};
+                  touch.getPoint(tmp_x, tmp_y, touch.getSupportTouchPoint());
+                  delay(1);
+              }
+              Serial.printf("Got CAP touch: X:%d Y:%d Points:%d\n",
+                            t_x[0], t_y[0], points);
+          }
+          was_pressed = pressed;
+      }
+
+      bool matched = false;
+      for (int8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
+          bool found = false;
+          if (!matched && pressed) {
+              for (int16_t i = 0; i < points && i < 5; i++) {
+                  if (display_obj.key[b].contains(t_x[i], t_y[i])) {
+                      found = true;
+                      matched = true;
+                      break;
+                  }
+              }
+          }
+          display_obj.key[b].press(found);
+      }
+
+  #elif defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
+      // 2.4" BBCAP capacitive
       uint16_t t_x = 0, t_y = 0;
       pressed = display_obj.tft.getTouchBBC(&t_x, &t_y);
 
@@ -5752,7 +5838,78 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
           y_pos_x = 0;
           y_pos_y = 0;
           y_pos_z = 0;
-          
+          /*boolean pressed = false;
+
+          #if defined(CYD_32CAP) || defined(CYD_35CAP)
+              int16_t t_x[5] = {0,0,0,0,0}, t_y[5] = {0,0,0,0,0};
+              int16_t points = 0;
+          #elif defined(CYD_24CAP) || defined(CYD_22CAP)
+              uint16_t t_x = 0, t_y = 0;
+          #else
+              uint16_t t_x = 0, t_y = 0;
+          #endif
+
+          #if defined(CYD_32CAP) || defined(CYD_35CAP)
+              if (!display_obj.headless_mode) {
+                  points = touch.getPoint(t_x, t_y, touch.getSupportTouchPoint());
+                  pressed = points > 0;
+
+                  if (pressed && !was_pressed) {
+                      
+                      for (int i = 0; i < THROW_AWAY_TOUCH_COUNT; i++) {
+                          int16_t tmp_x[5] = {0,0,0,0,0}, tmp_y[5] = {0,0,0,0,0};
+                          touch.getPoint(tmp_x, tmp_y, touch.getSupportTouchPoint());
+                          delay(1);
+                      }
+                  }
+                  if (pressed) {
+                      Serial.print("Got touch | X: "); Serial.print(t_x[0]);
+                      Serial.print(" Y: "); Serial.println(t_y[0]);
+                      Serial.print("Points: "); Serial.println(points);
+                  }
+              } else {
+                  Serial.println("headless mode");
+              }
+
+          #elif !defined(CYD_32CAP) && !defined(CYD_35CAP) && !defined(CYD_24CAP)
+              pressed = display_obj.tft.getTouch(&t_x, &t_y, 600);
+              if (pressed) {
+                  Serial.print("Got touch | X: "); Serial.print(t_x);
+                  Serial.print(" Y: "); Serial.println(t_y);
+              }
+          #elif defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
+            pressed = display_obj.tft.getTouchBBC(&t_x, &t_y);
+          #endif
+
+          // Check buttons for presses
+          #if defined(CYD_32CAP) || defined(CYD_35CAP)
+              for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
+                  bool found = false;
+                  if (pressed) {
+                      for (int16_t i = 0; i < points; i++) {
+                          if (display_obj.key[b].contains(t_x[i], t_y[i])) {
+                              found = true;
+                              //Serial.print("Button "); Serial.print(b);
+                              //Serial.println(" pressed");
+                          }
+                      }
+                  }
+                  display_obj.key[b].press(found);
+              }
+          #else
+              for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
+                  if (pressed && display_obj.key[b].contains(t_x, t_y)) {
+                      display_obj.key[b].press(true);
+                      //Serial.print("Button "); Serial.print(b);
+                      //Serial.println(" pressed");
+                  } else {
+                      display_obj.key[b].press(false);
+                  }
+              }
+          #endif
+          #if defined(CYD_32CAP) || defined(CYD_35CAP)
+            was_pressed = pressed;
+          #endif*/
           
     // Which buttons pressed
     //for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++)
@@ -5859,7 +6016,71 @@ void WiFiScan::packetMonitorMain(uint32_t currentTime)
           y_pos_x = 0;
           y_pos_y = 0;
           y_pos_z = 0;
-          
+          /*boolean pressed = false;
+
+          #if defined(CYD_32CAP) || defined(CYD_35CAP)
+            int16_t t_x[5] = {0,0,0,0,0}, t_y[5] = {0,0,0,0,0};
+            int16_t points = 0;
+          #elif defined(CYD_24CAP) || defined(CYD_22CAP)
+            uint16_t t_x = 0, t_y = 0;
+          #else
+            uint16_t t_x = 0, t_y = 0; // To store the touch coordinates
+          #endif
+
+          #if defined(CYD_32CAP) || defined(CYD_35CAP)
+              if (!display_obj.headless_mode) {
+                  points = touch.getPoint(t_x, t_y, touch.getSupportTouchPoint());
+                  pressed = points > 0;
+
+                  if (pressed && !was_pressed) { // New press detected
+                      // Throw away touches for stabilization
+                      for (int i = 0; i < THROW_AWAY_TOUCH_COUNT; i++) {
+                          int16_t tmp_x[5] = {0,0,0,0,0}, tmp_y[5] = {0,0,0,0,0};
+                          touch.getPoint(tmp_x, tmp_y, touch.getSupportTouchPoint());
+                          delay(1);
+                      }
+                  }
+                  if (pressed) {
+                      Serial.print("Got touch | X: "); Serial.print(t_x[0]);
+                      Serial.print(" Y: "); Serial.println(t_y[0]);
+                      Serial.print("Points: "); Serial.println(points);
+                  }
+              } else {
+                  Serial.println("headless mode");
+              }
+          #elif defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
+            pressed = display_obj.tft.getTouchBBC(&t_x, &t_y);
+          #else
+            pressed = display_obj.tft.getTouch(&t_x, &t_y);
+          #endif
+
+          // Check buttons for presses
+          #if defined(CYD_32CAP) || defined(CYD_35CAP)
+              for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
+                  bool found = false;
+                  if (pressed) {
+                      for (int16_t i = 0; i < points; i++) {
+                          if (display_obj.key[b].contains(t_x[i], t_y[i])) {
+                              found = true;
+                              //Serial.print("Button "); Serial.print(b);
+                              //Serial.println(" pressed");
+                          }
+                      }
+                  }
+                  display_obj.key[b].press(found);
+              }
+          #else
+              for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
+                  if (pressed && display_obj.key[b].contains(t_x, t_y)) {
+                      display_obj.key[b].press(true);
+                  } else {
+                      display_obj.key[b].press(false);
+                  }
+              }
+          #endif
+          #if defined(CYD_32CAP) || defined(CYD_35CAP)
+            was_pressed = pressed;
+          #endif*/
           
           // Which buttons pressed
       //for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++)
