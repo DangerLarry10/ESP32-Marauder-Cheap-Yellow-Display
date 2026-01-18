@@ -2315,10 +2315,6 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
           Serial.println("Using TFT DIY");
         #endif
 
-      #if !defined(CYD_32CAP) && !defined(CYD_35CAP)
-        display_obj.tft.setTouch(calData);
-      #endif
-      
         //display_obj.tft.setFreeFont(1);
         display_obj.tft.setFreeFont(NULL);
         display_obj.tft.setTextSize(1);
@@ -5801,25 +5797,6 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
           }
       }
 
-  #else
-      // Resistive fallback
-      uint16_t t_x = 0, t_y = 0;
-      pressed = display_obj.tft.getTouch(&t_x, &t_y, 600);
-
-      if (pressed && !was_pressed) {
-        //Serial.printf("Got resistive touch: X:%u Y:%u\n", t_x, t_y);
-      }
-      was_pressed = pressed;
-
-      bool matched = false;
-      for (int8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
-          if (!matched && pressed && display_obj.key[b].contains(t_x, t_y)) {
-              display_obj.key[b].press(true);
-              matched = true;
-          } else {
-              display_obj.key[b].press(false);
-          }
-      }
 #endif
 
     // Debounced button release detection
@@ -5854,13 +5831,6 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
 #ifdef HAS_SCREEN
   void WiFiScan::eapolMonitorMain(uint32_t currentTime) 
   {
-      #if defined(CYD_32CAP) || defined(CYD_35CAP)
-        touch.setMaxCoordinates(SCREEN_HEIGHT, SCREEN_WIDTH);
-        touch.setSwapXY(true);
-        touch.setMirrorXY(false, true);
-        static bool was_pressed = false; // Track press state
-      #endif
-
       for (x_pos = (11 + x_scale); x_pos <= TFT_HEIGHT; x_pos = x_pos) {
           currentTime = millis();
           do_break = false;
@@ -5980,12 +5950,6 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
         else if (b == 6) {
           Serial.println("Exiting packet monitor...");
           this->StartScan(WIFI_SCAN_OFF);
-          #if defined(CYD_32CAP) || defined(CYD_35CAP)
-          // Restore touch orientation for main UI
-          touch.setMaxCoordinates(SCREEN_WIDTH, SCREEN_HEIGHT);
-          touch.setSwapXY(false);
-          touch.setMirrorXY(false, false);
-        #endif
           //display_obj.tft.init();
           this->orient_display = true;
           return;
@@ -6043,13 +6007,6 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
 
 void WiFiScan::packetMonitorMain(uint32_t currentTime)
   {
-      #if defined(CYD_32CAP) || defined(CYD_35CAP)
-        touch.setMaxCoordinates(SCREEN_HEIGHT, SCREEN_WIDTH);
-        touch.setSwapXY(true);
-        touch.setMirrorXY(false, true);
-        static bool was_pressed = false; // Track press state
-      #endif
-
       
       for (x_pos = (11 + x_scale); x_pos <= TFT_HEIGHT; x_pos = x_pos)
       {
@@ -6225,12 +6182,6 @@ void WiFiScan::packetMonitorMain(uint32_t currentTime)
           }
           else if (b == 6) {
             Serial.println("Exiting packet monitor...");
-            #if defined(CYD_32CAP) || defined(CYD_35CAP)
-              // Restore touch orientation for main UI
-              touch.setMaxCoordinates(SCREEN_WIDTH, SCREEN_HEIGHT);
-              touch.setSwapXY(false);
-              touch.setMirrorXY(false, false);
-            #endif
             this->StartScan(WIFI_SCAN_OFF);
             this->orient_display = true;
             return;

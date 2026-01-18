@@ -34,7 +34,7 @@ void Display::RunSetup()
   tft.setCursor(0, 0);
 
   #ifdef HAS_SCREEN
-    #if defined(CYD_28)
+    #ifdef CYD_28CAP
       uint16_t calData[5] = { 350, 3465, 188, 3431, 2 };
     #elif defined(CYD_28CAP)
       uint16_t calData[5] = { 350, 3465, 188, 3431, 2 };

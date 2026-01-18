@@ -58,15 +58,6 @@ MenuFunctions::MenuFunctions()
       else
         return !display_obj.headless_mode;
     }
-    #else
-      // Resistive touch
-      uint8_t MenuFunctions::updateTouch(uint16_t *x, uint16_t *y, uint16_t threshold) {
-        if (!display_obj.headless_mode)
-          return display_obj.tft.getTouch(x, y, threshold);
-        else
-          return !display_obj.headless_mode;
-      }
-    #endif
   
 
 
@@ -184,11 +175,6 @@ MenuFunctions::MenuFunctions()
   
   void MenuFunctions::deinitLVGL() {
       //Serial.println(F("Deinit LVGL"));
-      #if defined(CYD_32CAP) || defined(CYD_35CAP)
-        touch.setMaxCoordinates(SCREEN_WIDTH, SCREEN_HEIGHT);
-        touch.setSwapXY(false);
-        touch.setMirrorXY(false, false);
-      #endif
       //display_obj.exit_draw = true;
   }
   
@@ -785,12 +771,7 @@ void MenuFunctions::main(uint32_t currentTime)
     
     boolean pressed = false;
 
-    #if defined(CYD_32CAP) || defined(CYD_35CAP)
-      int16_t t_x[5] = {0, 0, 0, 0, 0}, t_y[5] = {0, 0, 0, 0, 0}; // To store the touch coordinates
-      int16_t points = 0;
-    #else
-      uint16_t t_x = 0, t_y = 0;
-    #endif
+    uint16_t t_x = 0, t_y = 0;
     
     // Handle LVGL modes explicitly
     if (wifi_scan_obj.currentScanMode == LV_JOIN_WIFI || wifi_scan_obj.currentScanMode == LV_ADD_SSID) {
@@ -819,14 +800,8 @@ void MenuFunctions::main(uint32_t currentTime)
 #endif
 
 #if defined(HAS_ILI9341) || defined(HAS_ST7796) || defined(HAS_ST7789)
-    #if defined(CYD_32CAP) || defined(CYD_35CAP)
-      if (!this->disable_touch)
-        points = this->updateTouch(t_x, t_y);
-        pressed = points && points > 0;
-    #else
       if (!this->disable_touch)
       pressed = this->updateTouch(&t_x, &t_y);
-    #endif
       
     #ifdef HAS_SCREEN
     if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) &&
@@ -977,24 +952,6 @@ void MenuFunctions::main(uint32_t currentTime)
         (wifi_scan_obj.currentScanMode != WIFI_SCAN_SIG_STREN) &&
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL)) 
         {
-          #if defined(CYD_32CAP) || defined(CYD_35CAP)
-          for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
-            bool found = false;
-            if (pressed) {
-                //Serial.print("Checking button "); Serial.print(b); Serial.print(" with "); Serial.print(points); Serial.println(" points");
-                for (int16_t i = 0; i < points && i < 5; i++) {
-                    if (display_obj.key[b].contains(t_x[i], t_y[i])) {
-                        found = true;
-                        //Serial.print("Button "); Serial.print(b); Serial.println(" pressed");
-                        break;
-                    }
-                }
-                display_obj.key[b].press(found);
-            } else {
-                display_obj.key[b].press(false);
-            }
-          }
-          #else
           for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
             if (pressed && display_obj.key[b].contains(t_x, t_y)) {
                 display_obj.key[b].press(true);
@@ -1003,7 +960,6 @@ void MenuFunctions::main(uint32_t currentTime)
                 display_obj.key[b].press(false);
             }
           }
-          #endif
 
           for (uint8_t b = 0; b < current_menu->list->size(); b++) {
             display_obj.tft.setFreeFont(MENU_FONT);
@@ -1481,11 +1437,7 @@ void MenuFunctions::drawStatusBar()
     display_obj.tft.fillRect(50, 0, TFT_WIDTH * 0.21, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
   #endif
   #ifdef HAS_FULL_SCREEN
-    #if defined(CYD_35CAP) || defined(CYD_35)
-      display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 68, 0, 2);
-    #else
-      display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 50, 0, 2);
-    #endif
+    display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 50, 0, 2);
   #endif
 
   #ifdef HAS_MINI_SCREEN
@@ -1497,11 +1449,7 @@ void MenuFunctions::drawStatusBar()
   wifi_scan_obj.old_free_ram = wifi_scan_obj.free_ram;
   display_obj.tft.fillRect(100, 0, 60, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
   #ifdef HAS_FULL_SCREEN
-    #if defined(CYD_35CAP) || defined(CYD_35)
-      display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", 130, 0, 2);
-    #else
-      display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", 100, 0, 2);
-    #endif
+    display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", 100, 0, 2);
   #endif
 
   #ifdef HAS_MINI_SCREEN
@@ -1996,17 +1944,11 @@ void MenuFunctions::RunSetup()
     this->changeMenu(&generateSSIDsMenu);
     wifi_scan_obj.RunGenerateSSIDs();
   });
-  #if defined(HAS_ILI9341) || defined(HAS_ST7796) && !defined(CYD_35CAP) || defined(HAS_ST7789) && !defined(CYD_32CAP)
+  #if defined(HAS_ST7789)
     this->addNodes(&wifiGeneralMenu, text_table1[1], TFTNAVY, NULL, KEYBOARD_ICO, [this](){
       display_obj.clearScreen(); 
       wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_YELLOW); 
       addSSIDGFX();
-    });
-  #endif
-  #if (!defined(HAS_ILI9341) && !defined(HAS_ST7796) && defined(HAS_BUTTONS))
-    this->addNodes(&wifiGeneralMenu, text_table1[1], TFTNAVY, NULL, KEYBOARD_ICO, [this](){
-      this->changeMenu(&miniKbMenu);
-      this->miniKeyboard(&miniKbMenu);
     });
   #endif
   this->addNodes(&wifiGeneralMenu, text_table1[28], TFTSILVER, NULL, CLEAR_ICO, [this]() {
