@@ -43,7 +43,7 @@
 
 // Only define one driver, the other ones must be commented out
 //#define ILI9341_DRIVER       // Generic driver for common displays
-#define ILI9341_2_DRIVER     // Alternative ILI9341 driver, see https://github.com/Bodmer/TFT_eSPI/issues/1172
+//#define ILI9341_2_DRIVER     // Alternative ILI9341 driver, see https://github.com/Bodmer/TFT_eSPI/issues/1172
 //#define ST7735_DRIVER      // Define additional parameters below for this display
 //#define ILI9163_DRIVER     // Define additional parameters below for this display
 //#define S6D02A1_DRIVER
@@ -52,7 +52,7 @@
 //#define ILI9481_DRIVER
 //#define ILI9486_DRIVER
 //#define ILI9488_DRIVER     // WARNING: Do not connect ILI9488 display SDO to MISO if other devices share the SPI bus (TFT SDO does NOT tristate when CS is high)
-//#define ST7789_DRIVER      // Full configuration option, define additional parameters below for this display
+#define ST7789_DRIVER      // Full configuration option, define additional parameters below for this display
 //#define ST7789_2_DRIVER    // Minimal configuration option, define additional parameters below for this display
 //#define R61581_DRIVER
 //#define RM68140_DRIVER
@@ -128,7 +128,7 @@
 // driven with a PWM signal or turned OFF/ON then this must be handled by the user
 // sketch. e.g. with digitalWrite(TFT_BL, LOW);
 
- #define TFT_BL   21            // LED back-light control pin
+ #define TFT_BL   27            // LED back-light control pin
  #define TFT_BACKLIGHT_ON HIGH  // Level to turn ON back-light (HIGH or LOW)
 
 
@@ -200,7 +200,7 @@
 
 // ###### EDIT THE PIN NUMBERS IN THE LINES FOLLOWING TO SUIT YOUR ESP32 SETUP   ######
 
-// For CYD ESP32-2432S028
+// For CYD ESP32-2432S028 (ST7789 + CST820 capacitive touch)
 #define TFT_WIDTH  240
 #define TFT_HEIGHT 320
 
@@ -210,14 +210,7 @@
 #define TFT_CS   15   // Chip select control pin
 #define TFT_DC   2    // Data Command control pin
 #define TFT_RST  -1   // Reset pin (could connect to Arduino RESET pin)
-#define TFT_BL   21   // LED back-light
-
-#define TOUCH_CS 33   // Chip select pin (T_CS) of touch screen
-#define SOFTSPI		  // Uncomment for software SPI
-
-#define TOUCH_MOSI 32 // Separate Touch SoftSPI bus
-#define TOUCH_MISO 39 // Separate Touch SoftSPI bus
-#define TOUCH_CLK 25  // Separate Touch SoftSPI bus
+#define TFT_BL   27   // LED back-light
 
 // For ESP32 Dev board (only tested with ILI9341 display)
 // The hardware SPI can be mapped to any pins
