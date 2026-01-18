@@ -7,6 +7,7 @@ TouchDrvGT911 touch;
 
 #if defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
 #include <bb_captouch.h>
+extern BBCapTouch bbct;
 #endif
 
 
@@ -5723,40 +5724,14 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
     // Disable unused buttons once
     
 
-  #if defined(CYD_32CAP) || defined(CYD_35CAP)
-      // 3.2"/3.5" capacitive
-      int16_t t_x[5] = {0}, t_y[5] = {0};
-      int16_t points = 0;
+  #if defined(CYD_28CAP)
+      uint16_t t_x = 0, t_y = 0;
+      TOUCHINFO ti = {};
+      pressed = bbct.getSamples(&ti) && ti.count > 0;
 
-      if (!display_obj.headless_mode) {
-          points = touch.getPoint(t_x, t_y, touch.getSupportTouchPoint());
-          pressed = (points > 0);
-
-          if (pressed && !was_pressed) {
-              for (int i = 0; i < THROW_AWAY_TOUCH_COUNT; i++) {
-                  int16_t tmp_x[5] = {0}, tmp_y[5] = {0};
-                  touch.getPoint(tmp_x, tmp_y, touch.getSupportTouchPoint());
-                  delay(1);
-              }
-              Serial.printf("Got CAP touch: X:%d Y:%d Points:%d\n",
-                            t_x[0], t_y[0], points);
-          }
-          was_pressed = pressed;
-      }
-
-      bool matched = false;
-      for (int8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
-          bool found = false;
-          if (!matched && pressed) {
-              for (int16_t i = 0; i < points && i < 5; i++) {
-                  if (display_obj.key[b].contains(t_x[i], t_y[i])) {
-                      found = true;
-                      matched = true;
-                      break;
-                  }
-              }
-          }
-          display_obj.key[b].press(found);
+      if (pressed) {
+          t_x = ti.x[0];
+          t_y = ti.y[0];
       }
 
   #elif defined(CYD_24CAP) || defined(CYD_22CAP) || defined(CYD_28CAP)
@@ -5765,12 +5740,6 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
       pressed = display_obj.tft.getTouchBBC(&t_x, &t_y);
 
       if (pressed && !was_pressed) {
-          for (int i = 0; i < 2; i++) {
-              uint16_t dummy_x, dummy_y;
-              display_obj.tft.getTouchBBC(&dummy_x, &dummy_y);
-              delay(1);
-          }
-
           uint16_t raw_x = t_x;
           uint16_t raw_y = t_y;
 
@@ -5781,7 +5750,7 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
           // Optional Y flip:
           // t_y = (TFT_HEIGHT - 1) - raw_y;
 
-          //Serial.printf("Got 2.4\" BBCAP touch: raw X:%u Y:%u | mapped X:%u Y:%u\n",
+          //Serial.printf("Got 2.8\" BBCAP touch: raw X:%u Y:%u | mapped X:%u Y:%u\n",
           //              raw_x, raw_y, t_x, t_y);
       }
 

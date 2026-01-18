@@ -3,8 +3,14 @@
 //#include "icons.h"
 #include "configs.h"
 #include "TouchDrvGT911.hpp"
+#ifdef CYD_28CAP
+#include <bb_captouch.h>
+#endif
 
 TouchDrvGT911 touch;
+#ifdef CYD_28CAP
+extern BBCapTouch bbct;
+#endif
 
 
 
