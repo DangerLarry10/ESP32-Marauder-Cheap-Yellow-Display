@@ -3,8 +3,14 @@
 //#include "icons.h"
 #include "configs.h"
 #include "TouchDrvGT911.hpp"
+#ifdef CYD_28CAP
+#include <bb_captouch.h>
+#endif
 
 TouchDrvGT911 touch;
+#ifdef CYD_28CAP
+extern BBCapTouch bbct;
+#endif
 
 
 
@@ -21,53 +27,20 @@ MenuFunctions::MenuFunctions()
 // LVGL Stuff
 /* Interrupt driven periodic handler */
 #if defined(HAS_ST7789) || defined(HAS_ILI9341) || defined(HAS_ST7796)
-    #if defined(CYD_32CAP) || defined(CYD_35CAP)
-      uint8_t MenuFunctions::updateTouch(int16_t *x, int16_t *y, uint16_t threshold) {
-        static bool was_pressed = false;
-        if (!display_obj.headless_mode) {
-          int16_t t_x[5] = {0,0,0,0,0}, t_y[5] = {0,0,0,0,0};
-          uint8_t result = touch.getPoint(t_x, t_y, touch.getSupportTouchPoint());
-          bool pressed = result > 0;
+uint8_t MenuFunctions::updateTouch(uint16_t *x, uint16_t *y, uint16_t threshold) {
+  if (display_obj.headless_mode)
+    return 0;
 
-          if (pressed && !was_pressed) {
-            for (int i = 0; i < result; i++) {
-              x[i] = t_x[i];
-              y[i] = t_y[i];
-            }
-            
-            int16_t tmp_x[5] = {0,0,0,0,0}, tmp_y[5] = {0,0,0,0,0};
-            for (int i = 0; i < THROW_AWAY_TOUCH_COUNT; i++) {
-              touch.getPoint(tmp_x, tmp_y, touch.getSupportTouchPoint());
-              delay(1);
-            }
-            was_pressed = true;
-            return result;
-          } else if (!pressed) {
-            was_pressed = false;
-          }
-          return 0;
-        } else {
-          Serial.println("headless mode");
-          return !display_obj.headless_mode;
-        }
-      }
-    #elif defined(CYD_24CAP) || defined(CYD_22CAP)
-    uint8_t MenuFunctions::updateTouch(uint16_t *x, uint16_t *y, uint16_t threshold) {
-      if (!display_obj.headless_mode)
-        return display_obj.tft.getTouchBBC(x, y, threshold);
-      else
-        return !display_obj.headless_mode;
-    }
-    #else
-      // Resistive touch
-      uint8_t MenuFunctions::updateTouch(uint16_t *x, uint16_t *y, uint16_t threshold) {
-        if (!display_obj.headless_mode)
-          return display_obj.tft.getTouch(x, y, threshold);
-        else
-          return !display_obj.headless_mode;
-      }
-    #endif
-  
+  TOUCHINFO ti = {};
+  if (bbct.getSamples(&ti) && ti.count > 0) {
+    *x = ti.x[0];
+    *y = ti.y[0];
+    return 1;
+  }
+
+  return 0;
+}
+#endif
 
 
 
@@ -100,36 +73,14 @@ MenuFunctions::MenuFunctions()
     static bool was_pressed = false;
     bool touched = false;
   
-    #if defined(CYD_32CAP) || defined(CYD_35CAP)    
-      int16_t touchX = 0, touchY = 0;
-    #else
-      uint16_t touchX, touchY;
-    #endif
-
-  #if defined(CYD_32CAP) || defined(CYD_35CAP)
-      touch.setMaxCoordinates(SCREEN_HEIGHT, SCREEN_WIDTH);
-      touch.setSwapXY(true);
-      touch.setMirrorXY(true, true);
-      int16_t touchX_array[5] = {0, 0, 0, 0, 0}, touchY_array[5] = {0, 0, 0, 0, 0};
-      int16_t points = touch.getPoint(touchX_array, touchY_array, touch.getSupportTouchPoint());
-      touched = (points > 0);
-      if (touched) {
-          touchX = touchX_array[0];
-          touchY = touchY_array[0];
-          if (!was_pressed) {
-              for (int i = 0; i < THROW_AWAY_TOUCH_COUNT; i++) {
-                  int16_t tmp_x[5] = {0, 0, 0, 0, 0}, tmp_y[5] = {0, 0, 0, 0, 0};
-                  touch.getPoint(tmp_x, tmp_y, touch.getSupportTouchPoint());
-                  delay(1);
-              }
-          }
-      }
-      was_pressed = touched;
-  #elif defined(CYD_24CAP)
-      touched = display_obj.tft.getTouchBBC(&touchX, &touchY, 600);
-  #else
-      touched = display_obj.tft.getTouch(&touchX, &touchY, 600);
-  #endif
+    uint16_t touchX = 0;
+    uint16_t touchY = 0;
+    TOUCHINFO ti = {};
+    if (bbct.getSamples(&ti) && ti.count > 0) {
+      touchX = ti.x[0];
+      touchY = ti.y[0];
+      touched = true;
+    }
 
   // Handle touch state and coordinates
   if (!touched) {
@@ -184,11 +135,6 @@ MenuFunctions::MenuFunctions()
   
   void MenuFunctions::deinitLVGL() {
       //Serial.println(F("Deinit LVGL"));
-      #if defined(CYD_32CAP) || defined(CYD_35CAP)
-        touch.setMaxCoordinates(SCREEN_WIDTH, SCREEN_HEIGHT);
-        touch.setSwapXY(false);
-        touch.setMirrorXY(false, false);
-      #endif
       //display_obj.exit_draw = true;
   }
   
@@ -785,12 +731,7 @@ void MenuFunctions::main(uint32_t currentTime)
     
     boolean pressed = false;
 
-    #if defined(CYD_32CAP) || defined(CYD_35CAP)
-      int16_t t_x[5] = {0, 0, 0, 0, 0}, t_y[5] = {0, 0, 0, 0, 0}; // To store the touch coordinates
-      int16_t points = 0;
-    #else
-      uint16_t t_x = 0, t_y = 0;
-    #endif
+    uint16_t t_x = 0, t_y = 0;
     
     // Handle LVGL modes explicitly
     if (wifi_scan_obj.currentScanMode == LV_JOIN_WIFI || wifi_scan_obj.currentScanMode == LV_ADD_SSID) {
@@ -810,23 +751,17 @@ void MenuFunctions::main(uint32_t currentTime)
       display_obj.displayBuffer();
 
 
-#ifdef CYD_24CAP
+#if defined(CYD_28CAP)
   int pre_getTouch = millis();
 #endif
 
-#ifdef CYD_24CAP || defined(CYD_22CAP)
+#if defined(CYD_28CAP)
   int pre_getTouchBBC = millis();
 #endif
 
 #if defined(HAS_ILI9341) || defined(HAS_ST7796) || defined(HAS_ST7789)
-    #if defined(CYD_32CAP) || defined(CYD_35CAP)
-      if (!this->disable_touch)
-        points = this->updateTouch(t_x, t_y);
-        pressed = points && points > 0;
-    #else
       if (!this->disable_touch)
       pressed = this->updateTouch(&t_x, &t_y);
-    #endif
       
     #ifdef HAS_SCREEN
     if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) &&
@@ -977,24 +912,6 @@ void MenuFunctions::main(uint32_t currentTime)
         (wifi_scan_obj.currentScanMode != WIFI_SCAN_SIG_STREN) &&
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL)) 
         {
-          #if defined(CYD_32CAP) || defined(CYD_35CAP)
-          for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
-            bool found = false;
-            if (pressed) {
-                //Serial.print("Checking button "); Serial.print(b); Serial.print(" with "); Serial.print(points); Serial.println(" points");
-                for (int16_t i = 0; i < points && i < 5; i++) {
-                    if (display_obj.key[b].contains(t_x[i], t_y[i])) {
-                        found = true;
-                        //Serial.print("Button "); Serial.print(b); Serial.println(" pressed");
-                        break;
-                    }
-                }
-                display_obj.key[b].press(found);
-            } else {
-                display_obj.key[b].press(false);
-            }
-          }
-          #else
           for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
             if (pressed && display_obj.key[b].contains(t_x, t_y)) {
                 display_obj.key[b].press(true);
@@ -1003,7 +920,6 @@ void MenuFunctions::main(uint32_t currentTime)
                 display_obj.key[b].press(false);
             }
           }
-          #endif
 
           for (uint8_t b = 0; b < current_menu->list->size(); b++) {
             display_obj.tft.setFreeFont(MENU_FONT);
@@ -1481,11 +1397,7 @@ void MenuFunctions::drawStatusBar()
     display_obj.tft.fillRect(50, 0, TFT_WIDTH * 0.21, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
   #endif
   #ifdef HAS_FULL_SCREEN
-    #if defined(CYD_35CAP) || defined(CYD_35)
-      display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 68, 0, 2);
-    #else
-      display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 50, 0, 2);
-    #endif
+    display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 50, 0, 2);
   #endif
 
   #ifdef HAS_MINI_SCREEN
@@ -1497,11 +1409,7 @@ void MenuFunctions::drawStatusBar()
   wifi_scan_obj.old_free_ram = wifi_scan_obj.free_ram;
   display_obj.tft.fillRect(100, 0, 60, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
   #ifdef HAS_FULL_SCREEN
-    #if defined(CYD_35CAP) || defined(CYD_35)
-      display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", 130, 0, 2);
-    #else
-      display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", 100, 0, 2);
-    #endif
+    display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", 100, 0, 2);
   #endif
 
   #ifdef HAS_MINI_SCREEN
@@ -1582,24 +1490,9 @@ void MenuFunctions::orientDisplay()
   display_obj.tft.setCursor(0, 0);
 
   #ifdef HAS_SCREEN
-    #ifdef CYD_28
-      uint16_t calData[5] = { 350, 3465, 188, 3431, 2 }; // tft.setRotation(0); // Portrait with TFT Shield
-    #elif defined(CYD_24)
-      uint16_t calData[5] = { 481, 3053, 433, 3296, 3 }; // tft.setRotation(0); // Portrait with TFT Shield
-    #elif defined(CYD_24CAP)
-      uint16_t calData[5] = { 405, 3209, 297, 3314, 2 };
-    #elif defined(CYD_24G)
-      uint16_t calData[5] = { 405, 3209, 297, 3314, 2 }; // tft.setRotation(0); // Portrait with TFT Shield
-    #elif defined(CYD_32)
-      uint16_t calData[5] = { 251, 3539, 331, 3534, 6 }; // tft.setRotation(0); // Portrait with TFT Shield
-    #elif defined(CYD_35)
-      uint16_t calData[5] = { 309, 3465, 297, 3552, 6 };
-    #elif defined(TFT_DIY)
-      uint16_t calData[5] = { 339, 3470, 237, 3438, 2 }; // tft.setRotation(0); // Portrait with DIY TFT
-    #endif
-
-    #if !defined(CYD_32CAP) && !defined(CYD_35CAP)
-      display_obj.tft.setTouch(calData);
+    #ifdef CYD_28CAP
+      uint16_t calData[5] = { 350, 3465, 188, 3431, 2 };
+      (void)calData;
     #endif
   #endif
 
@@ -1994,17 +1887,11 @@ void MenuFunctions::RunSetup()
     this->changeMenu(&generateSSIDsMenu);
     wifi_scan_obj.RunGenerateSSIDs();
   });
-  #if defined(HAS_ILI9341) || defined(HAS_ST7796) && !defined(CYD_35CAP) || defined(HAS_ST7789) && !defined(CYD_32CAP)
+  #if defined(HAS_ST7789)
     this->addNodes(&wifiGeneralMenu, text_table1[1], TFTNAVY, NULL, KEYBOARD_ICO, [this](){
       display_obj.clearScreen(); 
       wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_YELLOW); 
       addSSIDGFX();
-    });
-  #endif
-  #if (!defined(HAS_ILI9341) && !defined(HAS_ST7796) && defined(HAS_BUTTONS))
-    this->addNodes(&wifiGeneralMenu, text_table1[1], TFTNAVY, NULL, KEYBOARD_ICO, [this](){
-      this->changeMenu(&miniKbMenu);
-      this->miniKeyboard(&miniKbMenu);
     });
   #endif
   this->addNodes(&wifiGeneralMenu, text_table1[28], TFTSILVER, NULL, CLEAR_ICO, [this]() {
@@ -3164,6 +3051,3 @@ void MenuFunctions::displayCurrentMenu(int start_index)
 }
 
 #endif
-
-
-

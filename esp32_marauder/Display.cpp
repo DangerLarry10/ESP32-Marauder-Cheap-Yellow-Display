@@ -34,23 +34,9 @@ void Display::RunSetup()
   tft.setCursor(0, 0);
 
   #ifdef HAS_SCREEN
-    #if defined(CYD_28)
+    #ifdef CYD_28CAP
       uint16_t calData[5] = { 350, 3465, 188, 3431, 2 };
-    #elif defined(CYD_24)
-      uint16_t calData[5] = { 481, 3053, 433, 3296, 3 };
-    #elif defined(CYD_24CAP)
-      uint16_t calData[5] = { 405, 3209, 297, 3314, 2 };
-    #elif defined(CYD_24G)
-      uint16_t calData[5] = { 405, 3209, 297, 3314, 2 };
-    #elif defined(CYD_32)
-      uint16_t calData[5] = { 251, 3539, 331, 3534, 6 };
-    #elif defined(CYD_35)
-      uint16_t calData[5] = { 309, 3465, 297, 3552, 6 };
-    #elif defined(TFT_DIY)
-      uint16_t calData[5] = { 339, 3470, 237, 3438, 2 };
-    #endif
-    #if !defined(CYD_32CAP) && !defined(CYD_35CAP)
-      tft.setTouch(calData);
+      (void)calData;
     #endif
   #endif
 
